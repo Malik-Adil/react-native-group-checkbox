@@ -1,0 +1,28 @@
+{
+  "name": "rn-group-checkbox",
+  "version": "1.0.4",
+  "description": "Easy to create the group checkbox in react native with deep customiztion",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Malik-Adil/react-native-group-checkbox.git"
+  },
+  "keywords": [
+    "rn-group-checkbox",
+    "react-native",
+    "react-native-checkbox",
+    "react-native-group-checkbox",
+    "group-checkbox",
+    "group-checkbox-react-native",
+    "checkbox"
+  ],
+  "author": "Malik Adil",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Malik-Adil/react-native-group-checkbox/issues"
+  },
+  "homepage": "https://github.com/Malik-Adil/react-native-group-checkbox#readme"
+}
