@@ -1,6 +1,6 @@
 {
   "name": "rn-group-checkbox",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Easy to create the group checkbox in react native with deep customiztion",
   "main": "index.js",
   "scripts": {
