@@ -1,24 +1,19 @@
-/**
- * rn-group-checkbox
- * Checkbox group component for react native, it works on iOS and Android
- * https://github.com/Malik-Adil/react-native-group-checkbox.git
- * Email:malikadil582@gmail.com
- * @flow
- */
-
 import React, { useState, useEffect } from 'react'
 import {
     StyleSheet,
     View,
     Image,
     Text,
-    TouchableHighlight
+    TextInput,
+    TouchableHighlight,
+    Alert,
+    ViewPropTypes as RNViewPropTypes,
 } from 'react-native';
 
 import PropTypes from "prop-types";
-
 const GroupCheckBox = (props) => {
     const [selectedOption, setSelectedOption] = useState([])
+    const [otherOptionClicked, setOtherOptionClicked] = useState({ showOtherInput: false, otherInputValue: "" })
 
 
     const SetInitialProps = () => {
@@ -33,6 +28,9 @@ const GroupCheckBox = (props) => {
 
 
     const CheckboxClicked = (option) => {
+
+
+
         if (selectedOption && selectedOption.includes(option)) {
             let newSelectedOption = selectedOption.filter(function (item) {
                 return item !== option
@@ -40,12 +38,83 @@ const GroupCheckBox = (props) => {
             setSelectedOption([...newSelectedOption])
             props.onClick(newSelectedOption)
         } else {
-            let options = selectedOption;
-            options.push(option);
-            setSelectedOption([...options]);
-            props.onClick(options)
+            if (props.applyMaxCondition && props.maxAllowToCheck < selectedOption.length) {
+                showMaxOptionAlert()
+            } else {
+
+                let options = selectedOption;
+                options.push(option);
+                setSelectedOption([...options]);
+                props.onClick(options)
+            }
         }
 
+
+    }
+
+
+    const OtherCheckboxClicked = () => {
+        if (otherOptionClicked.showOtherInput) {
+            let newSelectedOption = selectedOption.filter(function (item) {
+                return item !== otherOptionClicked.otherInputValue
+            })
+            setSelectedOption([...newSelectedOption])
+            setOtherOptionClicked({
+                showOtherInput: false,
+                otherInputValue: ""
+            })
+            props.onClick(newSelectedOption)
+        } else {
+            if (props.applyMaxCondition && props.maxAllowToCheck < selectedOption.length) {
+                showMaxOptionAlert()
+            } else {
+                setOtherOptionClicked({
+                    showOtherInput: true,
+                    otherInputValue: ""
+                })
+            }
+
+        }
+    }
+
+    const singleCheckbox = (Item, index, onCheckBoxClicked) => {
+        return (
+            <TouchableHighlight
+                key={`${Item}_${index}`}
+                onPress={() => onCheckBoxClicked(Item)}
+                underlayColor='transparent'
+            >
+                <View style={[
+                    styles.itemContainer,
+                    props.itemContainer
+                ]}>
+                    {props.labelPosition === 'left' && <Text style={[
+                        styles.labelStyle,
+                        props.labelStyle
+                    ]}> {Item} </Text>}
+                    {getCheckBox(Item)}
+                    {props.labelPosition === 'right' && <Text style={[
+                        styles.labelStyle,
+                        props.labelStyle
+                    ]}> {Item} </Text>}
+                </View>
+            </TouchableHighlight>
+        )
+    }
+
+    const getCheckBox = (option) => {
+        let source = require('./img/ic_check_box_outline_blank.png');
+        let checkBoxStyle = props.checkboxUnCheckedStyle || styles.checkboxUnCheckedStyle
+        if (option === props.otherOptionLabel && otherOptionClicked.showOtherInput) {
+            source = require('./img/ic_check_box.png');
+            checkBoxStyle = props.checkboxCheckedStyle || styles.checkboxCheckedStyle
+        }
+        else if (selectedOption.includes(option)) {
+            source = require('./img/ic_check_box.png');
+            checkBoxStyle = props.checkboxCheckedStyle || styles.checkboxCheckedStyle
+        }
+
+        return <Image source={source} style={checkBoxStyle} />
 
     }
 
@@ -53,62 +122,66 @@ const GroupCheckBox = (props) => {
         const data = props.data;
         if (data && data.length > 0) {
             return data.map((Item, index) => {
-                return (
-                    <TouchableHighlight
-                        key={`${Item}_${index}`}
-                        onPress={() => CheckboxClicked(Item)}
-                        underlayColor='transparent'
-                    >
-                        <View style={[
-                            styles.itemContainer,
-                            props.itemContainer
-                        ]}>
-                            {props.labelPosition === 'left' && <Text style={[
-                                styles.labelStyle,
-                                props.labelStyle
-                            ]}> {Item} </Text>}
-                            {getCheckBox(Item)}
-                            {props.labelPosition === 'right' && <Text style={[
-                                styles.labelStyle,
-                                props.labelStyle
-                            ]}> {Item} </Text>}
-                        </View>
-                    </TouchableHighlight>
-                )
+                return singleCheckbox(Item, index, CheckboxClicked)
             })
         }
     }
 
-
-    const getCheckBox = (option) => {
-        let source = require('./img/ic_check_box_outline_blank.png');
-        let checked = false
-        let checkBoxStyle = props.checkboxUnCheckedStyle || styles.checkboxUnCheckedStyle
-        if (selectedOption.includes(option)) {
-            source = require('./img/ic_check_box.png');
-            checkBoxStyle = props.checkboxCheckedStyle || styles.checkboxCheckedStyle
-            checked = true
+    const renderOther = () => {
+        if (props && props.otherOption) {
+            return singleCheckbox(props.otherOptionLabel, props.data.length, OtherCheckboxClicked)
         }
-
-        if(props.checkedImage && checked){
-            return props.checkedImage
-        }
-
-        if(props.unCheckedImage && !checked){
-            return props.unCheckedImage
-        }
-        
-        return <Image source={source} style={checkBoxStyle} />
-
     }
 
+    const onChangeText = (text) => {
+
+        if (otherOptionClicked.otherInputValue === "") {
+            let newOption = selectedOption;
+            newOption.push(text);
+            setSelectedOption([...newOption])
+
+        } else {
+            let newSelectedOption = selectedOption.filter(function (item) {
+                return item !== otherOptionClicked.otherInputValue
+            })
+            newSelectedOption.push(text)
+            setSelectedOption([...newSelectedOption])
+        }
+
+        setOtherOptionClicked({ showOtherInput: true, otherInputValue: text })
+        props.onClick(selectedOption)
+    }
+
+    const renderOtherInput = () => {
+        if (otherOptionClicked.showOtherInput) {
+            return (
+                <View style={styles.OtherTextBoxContainer}>
+                    <TextInput
+                        style={[styles.input, props.otherInputStyle]}
+                        onChangeText={onChangeText}
+                    />
+                </View>
+            )
+        }
+    }
+
+    const showMaxOptionAlert = () => {
+        Alert.alert(
+            props.messageForMaxLimitExceed,
+            "",
+            [
+                { text: props.maxLimitExceedAlertButtonText, onPress: () => console.log("OK Pressed") }
+            ]
+        );
+        return
+    }
 
     return (
-
         <View style={[styles.container, props.containerStyle]}>
             {renderCheckbox()}
+            {renderOther()}
+            {renderOtherInput()}
         </View>
-
     );
 }
 
@@ -124,7 +197,14 @@ GroupCheckBox.propTypes = {
     onClick: PropTypes.func.isRequired,
     data: PropTypes.array.isRequired,
     checkboxStyle: PropTypes.object,
-    defaultValue: PropTypes.array
+    defaultValue: PropTypes.array,
+    otherOption: PropTypes.bool,
+    otherOptionLabel:PropTypes.string,
+    otherInputStyle:PropTypes.object,
+    applyMaxCondition: PropTypes.bool,
+    maxAllowToCheck: PropTypes.number,
+    messageForMaxLimitExceed: PropTypes.string,
+    maxLimitExceedAlertButtonText:PropTypes.string
 };
 
 
@@ -133,18 +213,23 @@ GroupCheckBox.defaultProps = {
     onClick: (data) => { console.log(data) },
     defaultValue: ['one'],
     labelPosition: 'left',
+    otherOption: true,
+    applyMaxCondition: true,
+    maxAllowToCheck: 1,
+    messageForMaxLimitExceed:"You can select max 3 option",
+    maxLimitExceedAlertButtonText:"Okay",
+    otherOptionLabel:"Other"
 
 };
 
 
 const styles = StyleSheet.create({
     container: {
-        flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
     },
 
     itemContainer: {
-        flex: 1,
+       
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center'
@@ -158,6 +243,16 @@ const styles = StyleSheet.create({
     },
     checkboxCheckedStyle: {
         tintColor: 'green'
+    },
+    input: {
+        height: 40,
+        margin: 12,
+        borderWidth: 1,
+        padding: 10,
+        width:'100%'
+    },
+    OtherTextBoxContainer: {
+        alignSelf: 'flex-start',
     }
 
 });

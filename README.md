@@ -74,6 +74,14 @@ checkboxUnCheckedStyle | PropTypes.object | true |   |  Custom checkbox unchecke
 checkedImage  | Text.propTypes.style | true |  | Custom right Text style
 unCheckedImage  |  PropTypes.element  | true  |  Default image  | Custom  unchecked Image
 onClick   |  PropTypes.func.isRequired |  false  |  | callback  function
+applyMaxCondition   |  PropTypes.bool |  true  |  false |  Apply limit on checkbox items for check
+maxAllowToCheck   |  PropTypes.number |    |  1 |  Total number of check box allow to check apply only when applyMaxCondition true
+messageForMaxLimitExceed   |  PropTypes.string |  true  |  false |  Show Message then max checkbox limit exceeded
+maxLimitExceedAlertButtonText   |  PropTypes.string |  true  |  Okay |  Alert button text
+otherOption   |  PropTypes.bool |  true  |  true |  Show other option
+otherOptionLabel   |  PropTypes.string |  true  |  Other |  Label for other checkbox
+otherInputStyle   |  PropTypes.object |  true  |   |  Customize other input box
+
 
 ## Contribution
 
